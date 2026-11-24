@@ -1,0 +1,48 @@
+{
+  "name": "@dawnlit/agent-harness",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The agent CLIs installed on this computer — Claude Code and the Antigravity CLI — found, and asked for their version, sign-in, models and usage.",
+  "license": "Apache-2.0",
+  "author": "Dawnlit",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./models": {
+      "types": "./dist/models.d.ts",
+      "default": "./dist/models.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc -p .",
+    "test": "npm run build && node --test \"test/*.test.js\"",
+    "smoke": "npm run build && node scripts/smoke.js",
+    "prepare": "npm run build"
+  },
+  "peerDependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.330"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/claude-agent-sdk": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.330",
+    "@types/node": "^24.19.2",
+    "typescript": "~6.0.3"
+  }
+}
