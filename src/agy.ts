@@ -125,6 +125,12 @@ function groupOf(groups: QuotaGroup[], model: string): QuotaGroup | undefined {
     return groups.find((g) => `${g.name ?? ''} ${g.description ?? ''}`.toLowerCase().includes(family));
 }
 
+/** What the quota the model draws on is called — "Gemini", "Claude and GPT" — as agy last said. Null before it has said. */
+export function agyQuotaGroup(model: string): string | null {
+    const group = groupOf(quotaGroups, model);
+    return group ? groupName(group) : null;
+}
+
 /** When the quota the model draws on comes back, or 0 when it has some left, as far as agy last said. */
 export function agyHeldUntil(model: string): number {
     const group = groupOf(quotaGroups, model)?.name;

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { agyHeldUntil, noteQuota, quotaUsage, readQuota } from '../dist/agy.js';
+import { agyHeldUntil, agyQuotaGroup, noteQuota, quotaUsage, readQuota } from '../dist/agy.js';
 import { AGY_USAGE, USED_UP_UNTIL } from './support.js';
 
 const groups = readQuota(AGY_USAGE);
@@ -29,6 +29,13 @@ test('agyHeldUntil: a model waits for its own group, found by its family', () =>
     assert.equal(agyHeldUntil('gemini-4-argon'), 0);
     assert.equal(agyHeldUntil('gemini-pro-orchestrator'), 0);
     assert.equal(agyHeldUntil('mistral-large'), 0);
+});
+
+test('agyQuotaGroup: what the quota a model draws on is called', () => {
+    noteQuota(groups);
+    assert.equal(agyQuotaGroup('claude-opus-5-5'), 'Claude and GPT');
+    assert.equal(agyQuotaGroup('gemini-3.8-flash'), 'Gemini');
+    assert.equal(agyQuotaGroup('mistral-large'), null);
 });
 
 test('agyHeldUntil: a group with quota again is let go', () => {

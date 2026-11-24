@@ -14,7 +14,7 @@ export type { AgentId, AgentModel, AgentStatus, UsageWindow } from './types.js';
 export { locateAgent } from './locate.js';
 export type { LocateOptions } from './locate.js';
 export { CLAUDE_NOT_INSTALLED, sdkExecutable } from './claude.js';
-export { AGY_NOT_INSTALLED } from './agy.js';
+export { AGY_NOT_INSTALLED, agyQuotaGroup } from './agy.js';
 
 // agy's model ids, read and chosen between.
 export { AGY_LEVELS, resolveAgyChoice, splitAgyModelId } from './agyModels.js';
