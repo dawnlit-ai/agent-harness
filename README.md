@@ -23,6 +23,7 @@ await harness.models('claude');             // [{ id: 'opus', label: 'Opus 5.5',
 await harness.models('agy', {refresh: true});
 await harness.status('agy');                // { version, ready, detail, usage: [{ label, percentUsed, resetsAt }] }
 await harness.usage('agy', {signal});       // the usage alone, which also updates heldUntil
+await harness.test('claude', typedPath);    // the status a path not yet saved would have
 harness.heldUntil('agy', 'claude-opus-5-5'); // when that model's quota is back, or 0
 ```
 

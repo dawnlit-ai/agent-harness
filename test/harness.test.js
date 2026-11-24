@@ -80,6 +80,22 @@ test('an agy that is not where the app says is reported, not thrown', async () =
     await assert.rejects(harness.models('agy'), {message: `Not found at ${missing}.`});
 });
 
+test('test: a path not saved is checked, and not kept as the agent\'s status', async () => {
+    const agy = fakeAgy(tempDir());
+    const missing = join(tempDir(), isWindows ? 'agy.exe' : 'agy');
+    const harness = createAgentHarness({executable: () => missing});
+
+    const tried = await harness.test('agy', `  ${agy}  `);
+    assert.equal(tried.ready, true);
+    assert.equal(tried.executable, agy);
+    assert.equal(tried.version, '9.9.9');
+    assert.equal(harness.lastStatus('agy'), null);
+
+    const saved = await harness.status('agy');
+    assert.equal(saved.detail, `Not found at ${missing}.`);
+    await assert.rejects(harness.test('jev', agy), /no agent "jev"/);
+});
+
 test('locate: the app\'s own path wins, trimmed', () => {
     const harness = createAgentHarness({executable: () => '  /opt/agy  '});
     assert.equal(harness.locate('agy'), '/opt/agy');

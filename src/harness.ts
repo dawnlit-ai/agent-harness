@@ -41,6 +41,13 @@ export interface AgentHarness {
     lastStatus(id: AgentId): AgentStatus | null;
 
     /**
+     * The status the agent would have at `executable` — a path typed but not yet
+     * saved, say; empty is the one found. Neither joins `status` nor is kept as
+     * `lastStatus`. Never rejects for a known agent: what went wrong is the detail.
+     */
+    test(id: AgentId, executable: string): Promise<AgentStatus>;
+
+    /**
      * When the usage limit the model draws on lifts, or 0 when it is free to go,
      * as far as the agent last said. Claude's limit belongs to the login, so it
      * holds every model alike; agy's belongs to a group of models.
@@ -94,6 +101,11 @@ export function createAgentHarness(host: HarnessHost = {}): AgentHarness {
             return check;
         },
         lastStatus: (id) => found.get(id) ?? null,
+        test: async (id, executable) => {
+            known(id);
+            const exe = executable.trim() || locateAgent(id);
+            return id === 'claude' ? claudeStatus(exe) : agyStatus(exe);
+        },
         heldUntil: (id, model) => {
             known(id);
             return id === 'claude' ? usageHeldUntil() : agyHeldUntil(model);
