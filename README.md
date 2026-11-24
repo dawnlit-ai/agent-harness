@@ -31,8 +31,8 @@ harness.heldUntil('agy', 'claude-opus-5-5'); // when that model's quota is back,
   saying why, when the agent is not installed or not signed in.
 - `status` never rejects: what went wrong is its `detail`. A check already
   under way is joined, and `lastStatus` gives the last one found.
-- Model ids are the agent's own. agy lists each leveled model once per level
-  (`gemini-4-argon-high`); the harness gives it once (`gemini-4-argon`) with
+- Model ids are the agent's own. agy lists each leveled model once per level (`gemini-4-argon-high`); the harness gives
+  it once (`gemini-4-argon`) with
   its levels as `efforts` and `effortRequired: true`. `resolveAgyChoice` turns
   a stored `(model, effort)` pair — an old `<id>-<level>` one too — into what
   `agy --model` and `--effort` take.
@@ -47,10 +47,10 @@ reaches no Node module.
 The folders its installer puts it in first — an app opened from the Finder has
 no shell PATH to find it by — then the PATH.
 
-| | Windows | macOS, Linux |
-|---|---|---|
-| `claude` | `~\.local\bin\claude.exe` | `~/.local/bin`, `/opt/homebrew/bin`, `/usr/local/bin` |
-| `agy` | `%LOCALAPPDATA%\agy\bin\agy.exe`, `~\.local\bin\agy.exe` | the same three |
+|          | Windows                                                  | macOS, Linux                                          |
+|----------|----------------------------------------------------------|-------------------------------------------------------|
+| `claude` | `~\.local\bin\claude.exe`                                | `~/.local/bin`, `/opt/homebrew/bin`, `/usr/local/bin` |
+| `agy`    | `%LOCALAPPDATA%\agy\bin\agy.exe`, `~\.local\bin\agy.exe` | the same three                                        |
 
 On the PATH, Windows' launcher scripts (`claude.cmd`, as npm installs it) are
 found too, after a folder's program. `spawnAgent` and `runCommand` start one
@@ -66,9 +66,14 @@ the app installs it, and without it Claude's status says it could not start.
 
 ```sh
 npm install
-npm test        # build, then node --test
-npm run smoke   # ask the agents installed here; nothing runs on a model
+npm test          # build, typecheck the tests, then node --test
+npm run typecheck # the sources, the tests and the smoke script
+npm run smoke     # ask the agents installed here; nothing runs on a model
 ```
+
+The tests and the smoke script are TypeScript too, run as they are by Node's own type stripping (Node 22.18 or later)
+against the built `dist`, so they check the published types as well. They
+are typechecked with `tsconfig.test.json`.
 
 The package is ESM, built by `tsc` into `dist`. An app links it with
 `"@dawnlit/agent-harness": "file:../agent-harness"`.

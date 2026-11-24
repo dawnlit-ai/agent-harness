@@ -4,6 +4,7 @@ const TTL_MS = 10 * 60_000;
 export interface ListCache<T> {
     /** The list held for `key` while it is fresh, else `ask`'s. `refresh` asks again whatever is held. */
     get(key: string, ask: () => Promise<T>, refresh?: boolean): Promise<T>;
+
     /** A list just had another way, kept as if asked. */
     set(key: string, list: T): void;
 }

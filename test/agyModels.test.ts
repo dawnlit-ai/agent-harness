@@ -4,10 +4,11 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import { parseAgyModels, resolveAgyChoice, splitAgyModelId } from '../dist/agyModels.js';
-import { AGY_MODELS } from './support.js';
+import type { AgentModel } from '../dist/index.js';
+import { AGY_MODELS } from './support.ts';
 
 const models = parseAgyModels(AGY_MODELS);
-const byId = (id) => models.find((m) => m.id === id);
+const byId = (id: string): AgentModel | undefined => models.find((m) => m.id === id);
 
 test('parseAgyModels: one entry per model, its levels as efforts, lowest first', () => {
     assert.deepEqual(byId('gemini-4-neon'), {
@@ -16,7 +17,7 @@ test('parseAgyModels: one entry per model, its levels as efforts, lowest first',
         efforts: ['low', 'medium', 'high', 'xhigh'],
         effortRequired: true,
     });
-    assert.deepEqual(byId('claude-opus-5-5').efforts, ['low', 'medium', 'high']);
+    assert.deepEqual(byId('claude-opus-5-5')?.efforts, ['low', 'medium', 'high']);
 });
 
 test('parseAgyModels: the order agy lists them in, with its chatter left out', () => {
@@ -64,7 +65,10 @@ test('splitAgyModelId: the level an id ends with, and only a level', () => {
 test('resolveAgyChoice: a listed model keeps an effort it takes and drops one it does not', () => {
     assert.deepEqual(resolveAgyChoice('gemini-4-argon', 'high', models), {model: 'gemini-4-argon', effort: 'high'});
     assert.deepEqual(resolveAgyChoice('gemini-4-neon', 'XHIGH', models), {model: 'gemini-4-neon', effort: 'xhigh'});
-    assert.deepEqual(resolveAgyChoice('gemini-pro-orchestrator', 'high', models), {model: 'gemini-pro-orchestrator', effort: ''});
+    assert.deepEqual(resolveAgyChoice('gemini-pro-orchestrator', 'high', models), {
+        model: 'gemini-pro-orchestrator',
+        effort: ''
+    });
 });
 
 test('resolveAgyChoice: a model that must be given a level runs at medium, or its only one, when none it takes is chosen', () => {

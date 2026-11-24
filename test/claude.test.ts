@@ -4,9 +4,13 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
 
+import type { SDKControlGetUsageResponse } from '@anthropic-ai/claude-agent-sdk';
 import { CLAUDE_NOT_INSTALLED, claudeStatus, planUsage, sdkExecutable, signedInAs } from '../dist/claude.js';
 import { holdUsage, usageHeldUntil, usageLimit, waitForUsage } from '../dist/claudeLimit.js';
-import { isWindows, tempDir } from './support.js';
+import { isWindows, tempDir } from './support.ts';
+
+/** A usage answer with these limits; planUsage reads nothing else of it. */
+const usageWith = (rate_limits: unknown): SDKControlGetUsageResponse => ({rate_limits}) as SDKControlGetUsageResponse;
 
 test('signedInAs: an account, an API key, another provider, or nothing to sign with', () => {
     assert.equal(signedInAs({email: 'a@b.c', subscriptionType: 'max'}), 'Signed in as a@b.c · max');
@@ -17,21 +21,19 @@ test('signedInAs: an account, an API key, another provider, or nothing to sign w
 });
 
 test('planUsage: the limits that carry a figure, per-model weeks after the rest', () => {
-    const usage = {
-        rate_limits: {
-            five_hour: {utilization: 12, resets_at: '2026-11-24T20:00:00Z'},
-            seven_day: {utilization: 40, resets_at: null},
-            seven_day_opus: {utilization: null, resets_at: null},
-            seven_day_sonnet: null,
-            model_scoped: [{display_name: 'Fable', utilization: 3, resets_at: '2026-11-30T00:00:00Z'}],
-        },
-    };
+    const usage = usageWith({
+        five_hour: {utilization: 12, resets_at: '2026-11-24T20:00:00Z'},
+        seven_day: {utilization: 40, resets_at: null},
+        seven_day_opus: {utilization: null, resets_at: null},
+        seven_day_sonnet: null,
+        model_scoped: [{display_name: 'Fable', utilization: 3, resets_at: '2026-11-30T00:00:00Z'}],
+    });
     assert.deepEqual(planUsage(usage), [
         {label: 'All models · 5 hours', percentUsed: 12, resetsAt: '2026-11-24T20:00:00Z'},
         {label: 'All models · week', percentUsed: 40, resetsAt: null},
         {label: 'Fable · week', percentUsed: 3, resetsAt: '2026-11-30T00:00:00Z'},
     ]);
-    assert.deepEqual(planUsage({rate_limits: null}), []);
+    assert.deepEqual(planUsage(usageWith(null)), []);
     assert.deepEqual(planUsage(null), []);
 });
 
@@ -80,7 +82,7 @@ test('sdkExecutable: npm\'s launcher script is followed to what it starts', {ski
 });
 
 // November in Los Angeles is UTC−8.
-const at = (h, m) => Date.UTC(2026, 10, 24, h, m);
+const at = (h: number, m: number): number => Date.UTC(2026, 10, 24, h, m);
 
 test('usageLimit: a reset time in its zone, today or tomorrow', () => {
     const now = at(10, 0); // 02:00 in Los Angeles

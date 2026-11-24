@@ -77,6 +77,7 @@ export interface CommandOptions extends SpawnAgentOptions {
     input?: string;
     /** Aborting ends the process and its children, and rejects with an `AbortError`. */
     signal?: AbortSignal;
+
     /** Each line it writes to stdout. */
     onLine?(line: string): void;
 }

@@ -5,7 +5,7 @@ import test from 'node:test';
 import { listCache } from '../dist/listCache.js';
 
 test('listCache: reused under the same key, asked again under another', async () => {
-    const cache = listCache();
+    const cache = listCache<number[]>();
     let asked = 0;
     const ask = async () => [++asked];
     assert.deepEqual(await cache.get('a', ask), [1]);
@@ -14,9 +14,9 @@ test('listCache: reused under the same key, asked again under another', async ()
 });
 
 test('listCache: an ask under way is joined, and refresh asks again', async () => {
-    const cache = listCache();
+    const cache = listCache<number>();
     let asked = 0;
-    const ask = () => new Promise((resolve) => setTimeout(() => resolve(++asked), 10));
+    const ask = (): Promise<number> => new Promise((resolve) => setTimeout(() => resolve(++asked), 10));
     const [one, two] = await Promise.all([cache.get('a', ask), cache.get('a', ask)]);
     assert.equal(one, 1);
     assert.equal(two, 1);
@@ -25,13 +25,13 @@ test('listCache: an ask under way is joined, and refresh asks again', async () =
 });
 
 test('listCache: a failure is not kept', async () => {
-    const cache = listCache();
+    const cache = listCache<string[]>();
     await assert.rejects(cache.get('a', () => Promise.reject(new Error('not signed in'))), /not signed in/);
     assert.deepEqual(await cache.get('a', async () => ['ok']), ['ok']);
 });
 
 test('listCache: a list had another way is kept as if asked', async () => {
-    const cache = listCache();
+    const cache = listCache<string[]>();
     cache.set('a', ['given']);
     assert.deepEqual(await cache.get('a', async () => ['asked']), ['given']);
 });

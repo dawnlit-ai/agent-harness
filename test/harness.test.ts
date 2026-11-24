@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { AGY_NOT_INSTALLED, createAgentHarness } from '../dist/index.js';
-import { fakeAgy, isWindows, tempDir, USED_UP_UNTIL } from './support.js';
+import { type AgentId, AGY_NOT_INSTALLED, createAgentHarness } from '../dist/index.js';
+import { fakeAgy, isWindows, tempDir, USED_UP_UNTIL } from './support.ts';
+
+/** An agent the harness does not know, as an app's IPC could pass it one. */
+const unknown = 'jev' as AgentId;
 
 test('status: agy\'s version, sign-in, model count and quota', async () => {
     const agy = fakeAgy(tempDir());
@@ -49,7 +52,7 @@ test('models: listed by base model, and the status check\'s list is reused', asy
     fakeAgy(dir, {models: 'Fetching available models...'});
     const models = await harness.models('agy');
     assert.equal(models.length, 7);
-    assert.deepEqual(models.find((m) => m.id === 'gemini-4-argon').efforts, ['low', 'medium', 'high']);
+    assert.deepEqual(models.find((m) => m.id === 'gemini-4-argon')?.efforts, ['low', 'medium', 'high']);
     await assert.rejects(harness.models('agy', {refresh: true}), /agy listed no models/);
 });
 
@@ -93,7 +96,7 @@ test('test: a path not saved is checked, and not kept as the agent\'s status', a
 
     const saved = await harness.status('agy');
     assert.equal(saved.detail, `Not found at ${missing}.`);
-    await assert.rejects(harness.test('jev', agy), /no agent "jev"/);
+    await assert.rejects(harness.test(unknown, agy), /no agent "jev"/);
 });
 
 test('locate: the app\'s own path wins, trimmed', () => {
@@ -103,7 +106,7 @@ test('locate: the app\'s own path wins, trimmed', () => {
 
 test('an agent the harness does not know is refused', async () => {
     const harness = createAgentHarness();
-    await assert.rejects(harness.status('jev'), /no agent "jev"/);
-    assert.throws(() => harness.locate('jev'), /no agent "jev"/);
+    await assert.rejects(harness.status(unknown), /no agent "jev"/);
+    assert.throws(() => harness.locate(unknown), /no agent "jev"/);
     assert.match(AGY_NOT_INSTALLED, /PATH/);
 });

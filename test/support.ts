@@ -6,7 +6,7 @@ import { join } from 'node:path';
 export const isWindows = process.platform === 'win32';
 
 /** A fresh folder of the test's own. */
-export const tempDir = (name = 'agent-harness-') => mkdtempSync(join(tmpdir(), name));
+export const tempDir = (name = 'agent-harness-'): string => mkdtempSync(join(tmpdir(), name));
 
 /** `agy models` as agy 1.5.16 prints it, its "Fetching…" line included. */
 export const AGY_MODELS = [
@@ -48,8 +48,18 @@ export const AGY_USAGE = JSON.stringify({
                     name: 'Gemini Models',
                     description: 'Models within this group: Gemini 4 Neon, Gemini 4 Argon, Orchestrator (Neon), Orchestrator (Carbon), Gemini 3.8 Flash',
                     buckets: [
-                        {id: 'gemini-weekly', window: 'weekly', remaining_fraction: 0.8188685178756714, reset_time: '2026-11-30T22:34:51Z'},
-                        {id: 'gemini-5h', window: '5h', remaining_fraction: 0.9899333119392395, reset_time: '2026-11-24T23:56:38Z'},
+                        {
+                            id: 'gemini-weekly',
+                            window: 'weekly',
+                            remaining_fraction: 0.8188685178756714,
+                            reset_time: '2026-11-30T22:34:51Z'
+                        },
+                        {
+                            id: 'gemini-5h',
+                            window: '5h',
+                            remaining_fraction: 0.9899333119392395,
+                            reset_time: '2026-11-24T23:56:38Z'
+                        },
                     ],
                 },
                 {
@@ -70,7 +80,18 @@ export const AGY_USAGE = JSON.stringify({
  * from the fixtures, and anything else by failing. On Windows it is a launcher
  * script, as npm would install it, so it is started through cmd.
  */
-export function fakeAgy(dir, {models = AGY_MODELS, usage = AGY_USAGE, version = '9.9.9'} = {}) {
+/** What the stand-in prints, each a fixture unless given. */
+export interface FakeAgyOutput {
+    models?: string;
+    usage?: string;
+    version?: string;
+}
+
+export function fakeAgy(dir: string, {
+    models = AGY_MODELS,
+    usage = AGY_USAGE,
+    version = '9.9.9'
+}: FakeAgyOutput = {}): string {
     writeFileSync(join(dir, 'models.txt'), models + '\n');
     writeFileSync(join(dir, 'usage.json'), usage + '\n');
     writeFileSync(join(dir, 'version.txt'), version + '\n');

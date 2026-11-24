@@ -5,9 +5,9 @@ import { delimiter, join } from 'node:path';
 import test from 'node:test';
 
 import { locateAgent } from '../dist/locate.js';
-import { isWindows, tempDir } from './support.js';
+import { isWindows, tempDir } from './support.ts';
 
-const touch = (...parts) => {
+const touch = (...parts: string[]): string => {
     const path = join(...parts);
     mkdirSync(join(path, '..'), {recursive: true});
     writeFileSync(path, '');
@@ -15,7 +15,7 @@ const touch = (...parts) => {
 };
 
 /** A system-wide install outside the test's folders, which would be found first on a developer's Mac. */
-const systemWide = (id) => !isWindows && [`/opt/homebrew/bin/${id}`, `/usr/local/bin/${id}`].some(existsSync);
+const systemWide = (id: string): boolean => !isWindows && [`/opt/homebrew/bin/${id}`, `/usr/local/bin/${id}`].some(existsSync);
 
 test('locateAgent: where the installer puts it comes before the PATH', () => {
     const home = tempDir();

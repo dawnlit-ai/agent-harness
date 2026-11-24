@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { agyHeldUntil, agyQuotaGroup, noteQuota, quotaUsage, readQuota } from '../dist/agy.js';
-import { AGY_USAGE, USED_UP_UNTIL } from './support.js';
+import { AGY_USAGE, USED_UP_UNTIL } from './support.ts';
 
 const groups = readQuota(AGY_USAGE);
 
@@ -17,7 +17,10 @@ test('quotaUsage: each group\'s windows as used, the shorter first', () => {
 });
 
 test('quotaUsage: a window agy says does not apply now is left out', () => {
-    const disabled = [{name: 'Gemini Models', buckets: [{window: '5h', remaining_fraction: 0, reset_time: USED_UP_UNTIL, disabled: true}]}];
+    const disabled = [{
+        name: 'Gemini Models',
+        buckets: [{window: '5h', remaining_fraction: 0, reset_time: USED_UP_UNTIL, disabled: true}]
+    }];
     assert.deepEqual(quotaUsage(disabled), []);
 });
 

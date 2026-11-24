@@ -28,8 +28,9 @@
   "scripts": {
     "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
     "build": "npm run clean && tsc -p .",
-    "test": "npm run build && node --test \"test/*.test.js\"",
-    "smoke": "npm run build && node scripts/smoke.js",
+    "typecheck": "tsc -p . --noEmit && tsc -p tsconfig.test.json",
+    "test": "npm run build && tsc -p tsconfig.test.json && node --test \"test/*.test.ts\"",
+    "smoke": "npm run build && node scripts/smoke.ts",
     "prepare": "npm run build"
   },
   "peerDependencies": {

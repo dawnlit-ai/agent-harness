@@ -1,16 +1,16 @@
 // Starting an agent's CLI: its output, its input, its exit, and Windows' launcher scripts.
 import assert from 'node:assert/strict';
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 
 import { agentEnv, runCommand } from '../dist/command.js';
-import { isWindows, tempDir } from './support.js';
+import { isWindows, tempDir } from './support.ts';
 
 const node = process.execPath;
 
 test('runCommand: each stdout line, from the input it was given', async () => {
-    const lines = [];
+    const lines: string[] = [];
     const exited = await runCommand(node, ['-e', 'process.stdin.pipe(process.stdout)'], {
         input: 'one\ntwo\nthree',
         onLine: (line) => lines.push(line),
@@ -41,7 +41,13 @@ test('runCommand: aborting ends it and rejects with an AbortError', async () => 
 });
 
 test('agentEnv: a parent Claude Code session\'s variables are left behind', () => {
-    const env = agentEnv({PATH: '/bin', CLAUDECODE: '1', CLAUDE_CODE_ENTRYPOINT: 'cli', ELECTRON_RUN_AS_NODE: '1', KEEP: 'yes'});
+    const env = agentEnv({
+        PATH: '/bin',
+        CLAUDECODE: '1',
+        CLAUDE_CODE_ENTRYPOINT: 'cli',
+        ELECTRON_RUN_AS_NODE: '1',
+        KEEP: 'yes'
+    });
     assert.equal(env.CLAUDECODE, undefined);
     assert.equal(env.CLAUDE_CODE_ENTRYPOINT, undefined);
     assert.equal(env.ELECTRON_RUN_AS_NODE, undefined);
@@ -51,16 +57,16 @@ test('agentEnv: a parent Claude Code session\'s variables are left behind', () =
 test('runCommand: a launcher script gets each argument whole', {skip: !isWindows && 'launcher scripts are Windows\''}, async () => {
     // A folder with a space and a parenthesis, as "Program Files (x86)" has.
     const dir = join(tempDir(), 'npm (global)');
-    await import('node:fs').then(({mkdirSync}) => mkdirSync(dir));
+    mkdirSync(dir);
     writeFileSync(join(dir, 'args.js'), 'console.log(JSON.stringify(process.argv.slice(2)))');
     const script = join(dir, 'agent.cmd');
     writeFileSync(script, `@"${node}" "%~dp0args.js" %*\r\n`);
 
     const args = ['plain', 'with space', 'a&b|c', '<in>', 'caret^', '', 'quo"te', '-p', '/usage'];
-    const lines = [];
+    const lines: string[] = [];
     const exited = await runCommand(script, args, {onLine: (line) => lines.push(line)});
     assert.equal(exited.code, 0, exited.stderr);
-    assert.deepEqual(JSON.parse(lines.at(-1)), args);
+    assert.deepEqual(JSON.parse(lines.at(-1) ?? 'null'), args);
 });
 
 test('runCommand: a launcher script is not handed what cmd would change', {skip: !isWindows && 'launcher scripts are Windows\''}, async () => {
